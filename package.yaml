@@ -25,6 +25,7 @@ dependencies:
 - StateVar
 - linear
 - text
+- mtl
 
 library:
   source-dirs: src

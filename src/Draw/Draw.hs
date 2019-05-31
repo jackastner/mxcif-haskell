@@ -3,13 +3,17 @@ module Draw.Draw where
 import SDL.Video
 import SDL.Event
 import SDL.Init
+import SDL.Time
 
 import Data.Text (pack)
 import Data.StateVar (($=))
+import Data.Int
+import Data.Maybe
 
 import System.Exit
 
 import Control.Monad
+import Control.Monad.State.Lazy
 
 import Linear.V4
 import Linear.V2
@@ -22,7 +26,13 @@ import qualified MxCif.OneD as OneD
 import qualified Geom.Rectangle as R
 import qualified Geom.Point as P
 
-displayMxCif :: RealFrac b => TwoD.MxCif a b -> IO ()
+data ControllerState b = ControllerState {
+  tree :: TwoD.MxCif Int b,
+  firstClick :: Maybe (P.Point b),
+  count :: Int
+}
+
+displayMxCif :: RealFrac b => TwoD.MxCif Int b -> IO ()
 displayMxCif t = do
   initializeAll
   w <- createWindow  (pack "MxCif") defaultWindow
@@ -30,17 +40,40 @@ displayMxCif t = do
 
   draw r t
 
-  present r
+  evalStateT (forever $ do
+    mapEvents handleEvent
+    (tree <$> get) >>= draw r
+    present r
+    delay 50) (ControllerState t Nothing 0)
 
-  forever $ mapEvents
-    (\e -> case e of
-      (Event _ QuitEvent) -> exitSuccess
-      _ -> return ())
+handleEvent :: RealFrac b => Event -> StateT (ControllerState b) IO()
+handleEvent (Event _ QuitEvent) = liftIO exitSuccess
+handleEvent (Event _ (MouseButtonEvent e)) =
+  when ((mouseButtonEventMotion e) == Released) $ do
+    prev <- firstClick <$> get
+    let p = fromSDLPoint $ mouseButtonEventPos e
+    modify $ (\s -> case prev of
+      Nothing -> s {
+        firstClick = Just p
+      }
+      (Just p0) -> s {
+        tree       = TwoD.insert (count s) (makeRectangle p0 p) (tree s),
+        firstClick = Nothing,
+        count      = 1 + count s
+      })
+handleEvent _ = return ()
+
+makeRectangle :: RealFrac a => P.Point a -> P.Point a -> R.Rectangle a
+makeRectangle (P.Point x0 y0) (P.Point x1 y1) =
+  R.Rectangle (P.Point (min x0 x1) (min y0 y1)) (P.Point (max x0 x1) (max y0 y1))
+
+fromSDLPoint :: RealFrac b => (Point V2 Int32) ->  P.Point b
+fromSDLPoint (P (V2 x y)) = P.Point (fromIntegral x) (fromIntegral y)
 
 class Drawable a where
-  draw :: Renderer -> a -> IO ()
+  draw :: (MonadIO m) => Renderer -> a -> m ()
 
-instance RealFrac a =>  Drawable (R.Rectangle a) where
+instance RealFrac a => Drawable (R.Rectangle a) where
   draw r rect = drawRect r . Just . toSDLRect $ rect
 
 instance RealFrac a => Drawable (R.XAxis a) where
