@@ -25,18 +25,18 @@ dependencies:
 library:
   source-dirs: src
 
-#executables:
-#  show-tree:
-#    main: Main.hs
-#    source-dirs:
-#    - app
-#    dependencies:
-#    - quadtree
-#    - sdl2
-#    - StateVar
-#    - linear
-#    - text
-#    - mtl
+executables:
+  show-tree:
+    main: Main.hs
+    source-dirs:
+    - app
+    dependencies:
+    - quadtree
+    - sdl2
+    - StateVar
+    - linear
+    - text
+    - mtl
 
 tests:
   quadtree-test:

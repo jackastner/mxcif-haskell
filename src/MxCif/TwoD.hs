@@ -23,14 +23,16 @@ data MxCif a b =
   } deriving Show
 
 insert e b t@(Tree b' x y nw ne sw se)
-  | (bounds nw) `contains` b = t { nw = insert e b nw }
-  | (bounds ne) `contains` b = t { ne = insert e b ne }
-  | (bounds sw) `contains` b = t { sw = insert e b sw }
-  | (bounds se) `contains` b = t { se = insert e b se }
+  | (S.spanLength $ YAxis b') <= 1 = trace "pixel" $ t { yTree = OneD.insert e (YAxis b) y }
+  | (S.spanLength $ XAxis b') <= 1 = trace "pixel" $ t { xTree = OneD.insert e (XAxis b) x }
+  | (bounds nw) `contains` b = trace "nw" $ t { nw = insert e b nw }
+  | (bounds ne) `contains` b = trace "ne" $ t { ne = insert e b ne }
+  | (bounds sw) `contains` b = trace "sw" $ t { sw = insert e b sw }
+  | (bounds se) `contains` b = trace "se" $ t { se = insert e b se }
   | b' `contains` b && (XAxis b) `S.contains` (PointX $ midpoint b') =
-      t { yTree = OneD.insert e (YAxis b) y }
+      trace "y" $ t { yTree = OneD.insert e (YAxis b) y }
   | b' `contains` b && (YAxis b) `S.contains` (PointY $ midpoint b') =
-      t { xTree = OneD.insert e (XAxis b) x }
+      trace "x" $ t { xTree = OneD.insert e (XAxis b) x }
   | otherwise = error "Out of bounds MxCif.TwoD insertion"
 insert e b (Empty b') = insert e b $ Tree b' (OneD.Empty $ XAxis b') (OneD.Empty $ YAxis b') (Empty nw) (Empty ne) (Empty sw) (Empty se)
   where (nw, ne, sw, se) = quadrants b'

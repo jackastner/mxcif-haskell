@@ -27,7 +27,7 @@ instance S.Span YAxis where
     (YAxis $ Rectangle p0 (Point x1 (S.midpoint s)),
      YAxis $ Rectangle (Point x0 (S.midpoint s)) p1)
 
-quadrants :: RealFrac a => Rectangle a -> (Rectangle a, Rectangle a, Rectangle a, Rectangle a)
+quadrants :: Integral a => Rectangle a -> (Rectangle a, Rectangle a, Rectangle a, Rectangle a)
 quadrants r = (nw, ne, sw, se)
   where (YAxis n, YAxis s)   = S.split $ YAxis r
         (XAxis nw, XAxis ne) = S.split $ XAxis n
@@ -37,5 +37,5 @@ contains :: Ord a => Rectangle a -> Rectangle a -> Bool
 contains r0 r1 = S.contains (XAxis r0) (XAxis r1) &&
                  S.contains (YAxis r0) (YAxis r1)
 
-midpoint :: RealFrac a => Rectangle a -> Point a
+midpoint :: Integral a => Rectangle a -> Point a
 midpoint r = Point (S.midpoint . XAxis $ r) (S.midpoint . YAxis $ r)
