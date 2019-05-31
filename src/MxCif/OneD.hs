@@ -21,7 +21,7 @@ instance (Span s, Show (s a), Show a, Show b) => Show (MxCif b (s a)) where
   show (Empty s) = "Empty {" ++ (showSpan s) ++ "}"
   show t         = "Tree {" ++ (show . elems $ t) ++ ", " ++ (showSpan . span $ t) ++ ", " ++ (show . left $ t) ++ ", " ++ (show . right $ t)  ++ "}"
 
-insert :: (Span s, Ord a, Fractional a) => b -> s a -> MxCif b (s a) -> MxCif b (s a)
+insert :: (Span s, Ord a, RealFrac a) => b -> s a -> MxCif b (s a) -> MxCif b (s a)
 insert e s (Tree es s' l r)
   | (span l) `contains` s = Tree es s' (insert e s l) r
   | (span r) `contains` s = Tree es s' l (insert e s r)

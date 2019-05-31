@@ -21,9 +21,21 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- sdl2
+- StateVar
+- linear
+- text
 
 library:
   source-dirs: src
+
+executables:
+  show-tree:
+    main: Main.hs
+    source-dirs:
+    - app
+    dependencies:
+    - quadtree
 
 tests:
   quadtree-test:
