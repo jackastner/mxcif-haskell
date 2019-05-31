@@ -32,7 +32,7 @@ data ControllerState b = ControllerState {
   count :: Int
 }
 
-displayMxCif :: RealFrac b => TwoD.MxCif Int b -> IO ()
+displayMxCif :: Integral b => TwoD.MxCif Int b -> IO ()
 displayMxCif t = do
   initializeAll
   w <- createWindow  (pack "MxCif") defaultWindow
@@ -46,7 +46,7 @@ displayMxCif t = do
     present r
     delay 50) (ControllerState t Nothing 0)
 
-handleEvent :: RealFrac b => Event -> StateT (ControllerState b) IO()
+handleEvent :: Integral b => Event -> StateT (ControllerState b) IO()
 handleEvent (Event _ QuitEvent) = liftIO exitSuccess
 handleEvent (Event _ (MouseButtonEvent e)) =
   when ((mouseButtonEventMotion e) == Released) $ do
@@ -63,31 +63,31 @@ handleEvent (Event _ (MouseButtonEvent e)) =
       })
 handleEvent _ = return ()
 
-makeRectangle :: RealFrac a => P.Point a -> P.Point a -> R.Rectangle a
+makeRectangle :: Integral a => P.Point a -> P.Point a -> R.Rectangle a
 makeRectangle (P.Point x0 y0) (P.Point x1 y1) =
   R.Rectangle (P.Point (min x0 x1) (min y0 y1)) (P.Point (max x0 x1) (max y0 y1))
 
-fromSDLPoint :: RealFrac b => (Point V2 Int32) ->  P.Point b
+fromSDLPoint :: Integral b => (Point V2 Int32) ->  P.Point b
 fromSDLPoint (P (V2 x y)) = P.Point (fromIntegral x) (fromIntegral y)
 
 class Drawable a where
   draw :: (MonadIO m) => Renderer -> a -> m ()
 
-instance RealFrac a => Drawable (R.Rectangle a) where
+instance Integral a => Drawable (R.Rectangle a) where
   draw r rect = drawRect r . Just . toSDLRect $ rect
 
-instance RealFrac a => Drawable (R.XAxis a) where
+instance Integral a => Drawable (R.XAxis a) where
   draw r = draw r . R.xRect
 
-instance RealFrac a => Drawable (R.YAxis a) where
+instance Integral a => Drawable (R.YAxis a) where
   draw r = draw r . R.yRect
 
-toSDLRect :: RealFrac a => R.Rectangle a -> Rectangle CInt
+toSDLRect :: Integral a => R.Rectangle a -> Rectangle CInt
 toSDLRect (R.Rectangle (P.Point _x0 _y0) (P.Point _x1 _y1)) =
-  let [x0, y0, x1, y1] = fromIntegral . round <$> [_x0, _y0, _x1, _y1] in
+  let [x0, y0, x1, y1] = fromIntegral <$> [_x0, _y0, _x1, _y1] in
     Rectangle (P $ V2 x0 y0) (V2 (x1 - x0) (y1 - y0))
 
-instance RealFrac b => Drawable (TwoD.MxCif a b) where
+instance Integral b => Drawable (TwoD.MxCif a b) where
   draw r t = do
     rendererDrawColor r $= V4 0xff 0xff 0xff 0xff
     draw r $ TwoD.bounds t
