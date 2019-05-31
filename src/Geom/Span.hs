@@ -7,7 +7,7 @@ class Span s where
 
 contains :: (Span s0, Span s1, Ord a) => s0 a -> s1 a -> Bool
 contains s0 s1 = (start s0) <= (start s1) &&
-                 (end s0) > (end s1)
+                 (end s0) >= (end s1)
 
 midpoint :: (Span s, RealFrac a) => s a -> a
 midpoint s = ((start s) + (end s)) / 2
