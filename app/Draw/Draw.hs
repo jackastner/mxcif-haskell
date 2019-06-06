@@ -21,18 +21,18 @@ import Linear.Affine
 
 import Foreign.C.Types
 
-import qualified MxCif.TwoD as TwoD
-import qualified MxCif.OneD as OneD
+import qualified MxCif.Quad as Quad
+import qualified MxCif.Bin as Bin
 import qualified Geom.Rectangle as R
 import qualified Geom.Point as P
 
 data ControllerState b = ControllerState {
-  tree :: TwoD.MxCif Int b,
+  tree :: Quad.MxCif Int b,
   firstClick :: Maybe (P.Point b),
   count :: Int
 }
 
-displayMxCif :: Integral b => TwoD.MxCif Int b -> IO ()
+displayMxCif :: Integral b => Quad.MxCif Int b -> IO ()
 displayMxCif t = do
   initializeAll
   w <- createWindow  (pack "MxCif") defaultWindow
@@ -57,7 +57,7 @@ handleEvent (Event _ (MouseButtonEvent e)) =
         firstClick = Just p
       }
       (Just p0) -> s {
-        tree       = TwoD.insert (count s) (makeRectangle p0 p) (tree s),
+        tree       = Quad.insert (count s) (makeRectangle p0 p) (tree s),
         firstClick = Nothing,
         count      = 1 + count s
       })
@@ -87,20 +87,20 @@ toSDLRect (R.Rectangle (P.Point _x0 _y0) (P.Point _x1 _y1)) =
   let [x0, y0, x1, y1] = fromIntegral <$> [_x0, _y0, _x1, _y1] in
     Rectangle (P $ V2 x0 y0) (V2 (x1 - x0) (y1 - y0))
 
-instance Integral b => Drawable (TwoD.MxCif a b) where
+instance Integral b => Drawable (Quad.MxCif a b) where
   draw r t = do
     rendererDrawColor r $= V4 0xff 0xff 0xff 0xff
-    draw r $ TwoD.bounds t
+    draw r $ Quad.bounds t
     case t of 
-     (TwoD.Empty _) -> return ()
-     (TwoD.Tree _ x y nw ne sw se) -> do
+     (Quad.Empty _) -> return ()
+     (Quad.Tree _ x y nw ne sw se) -> do
        mapM_ (draw r) [nw, ne, sw, se]
        draw r x
        draw r y
 
-instance (Drawable b) => Drawable (OneD.MxCif a b) where
-  draw r (OneD.Empty _) = return ()
-  draw r (OneD.Tree rects _ left right) = do
+instance (Drawable b) => Drawable (Bin.MxCif a b) where
+  draw r (Bin.Empty _) = return ()
+  draw r (Bin.Tree rects _ left right) = do
     rendererDrawColor r $= V4 0x00 0xff 0x00 0x00
     mapM_ (draw r . snd) rects
     mapM_ (draw r) [left, right]

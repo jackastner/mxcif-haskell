@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module MxCif.OneD where
+module MxCif.Bin where
 
 import Geom.Span
 
@@ -29,6 +29,6 @@ insert e s (Tree es s' l r)
   | (span l) `contains` s = trace "left" $ Tree es s' (insert e s l) r
   | (span r) `contains` s = trace "right" $ Tree es s' l (insert e s r)
   | s'       `contains` s = trace "done" $ Tree ((e,s):es) s' l r
-  | otherwise             = error "Out of bounds MxCif.OneD insertion"
+  | otherwise             = error "Out of bounds MxCif.Bin insertion"
 insert e s (Empty s') = insert e s $ Tree [] s' (Empty l) (Empty r)
   where (l, r) = split s'

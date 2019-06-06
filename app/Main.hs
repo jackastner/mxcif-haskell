@@ -4,7 +4,7 @@ import Foreign.C.Types
 
 import Data.List hiding (insert)
 
-import MxCif.TwoD
+import MxCif.Quad
 
 import Geom.Rectangle
 import Geom.Point
